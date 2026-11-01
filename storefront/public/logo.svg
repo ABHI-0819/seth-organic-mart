@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 165" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sethBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0E4B99" />
+      <stop offset="100%" stop-color="#052355" />
+    </linearGradient>
+    <linearGradient id="gheeGold" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFF05A" />
+      <stop offset="45%" stop-color="#FFC719" />
+      <stop offset="100%" stop-color="#F08C00" />
+    </linearGradient>
+  </defs>
+
+  <!-- Golden Drop with Negative-Space Cow Silhouette on Right -->
+  <g transform="translate(215, 6)">
+    <!-- Outer Golden Drop -->
+    <path d="M 48 6 C 48 6, 94 58, 94 90 C 94 114, 73 128, 46 126 C 32 125, 22 120, 18 117 C 28 114, 38 103, 40 88 C 41 78, 47 74, 56 76 C 63 77, 68 74, 67 68 C 66 63, 59 56, 56 51 C 59 46, 58 40, 54 38 C 51 41, 48 44, 44 44 C 40 41, 35 37, 31 38 C 31 42, 33 46, 35 49 C 28 50, 21 53, 15 50 C 26 35, 41 18, 48 6 Z" fill="url(#gheeGold)" />
+  </g>
+
+  <!-- "Seth" Serif Typography -->
+  <text x="18" y="114" font-family="Georgia, 'Times New Roman', Times, serif" font-size="102" font-weight="bold" fill="url(#sethBlue)" letter-spacing="-1">Seth</text>
+
+  <!-- "ORGANIC FARM" Sub-header -->
+  <text x="168" y="143" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="800" fill="#17478B" text-anchor="middle" letter-spacing="4.5">ORGANIC FARM</text>
+
+  <!-- Golden Divider Line & Wheat / Leaf Emblem -->
+  <line x1="65" y1="154" x2="150" y2="154" stroke="#F7B519" stroke-width="1.2" opacity="0.75" />
+  <g transform="translate(168, 154)" fill="#F7B519">
+    <ellipse cx="0" cy="-3" rx="2.2" ry="4.5" />
+    <ellipse cx="-4.5" cy="-1" rx="2" ry="4" transform="rotate(-35 -4.5 -1)" />
+    <ellipse cx="4.5" cy="-1" rx="2" ry="4" transform="rotate(35 4.5 -1)" />
+    <circle cx="0" cy="3" r="1.6" />
+  </g>
+  <line x1="186" y1="154" x2="271" y2="154" stroke="#F7B519" stroke-width="1.2" opacity="0.75" />
+</svg>
