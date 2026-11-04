@@ -1,33 +1,29 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { listProducts } from "@lib/data/products"
+import { getProductPrice } from "@lib/util/get-product-price"
 
-const ESSENTIALS = [
-  {
-    title: "A2 Desi Ghee",
-    subtitle: "Pure essence of traditional churned butter.",
-    handle: "/products/a2-desi-gir-cow-ghee",
-    img: "https://images.unsplash.com/photo-1631451095765-2c91616fc9e6?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Raw Forest Honey",
-    subtitle: "Unfiltered sweetness from wild Nectars.",
-    handle: "/products/raw-forest-honey",
-    img: "https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Mustard Oil",
-    subtitle: "Nutrient-rich, Kachi Ghani extraction.",
-    handle: "/products/cold-pressed-mustard-oil",
-    img: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    title: "Organic Jaggery",
-    subtitle: "Unrefined, chemical-free sweetness.",
-    handle: "/products/organic-sugarcane-jaggery",
-    img: "https://images.unsplash.com/photo-1606914469725-e398d2f1d7ee?auto=format&fit=crop&w=800&q=80",
-  },
-]
+const Hero = async ({ countryCode = "in" }: { countryCode?: string }) => {
+  // Fetch live published products and their uploaded images directly from Medusa Admin
+  let products: any[] = []
+  try {
+    const { response } = await listProducts({
+      countryCode,
+      queryParams: {
+        limit: 8,
+        fields: "*variants.calculated_price,+variants.inventory_quantity,*images",
+      },
+    })
+    products = response.products || []
+  } catch (e) {
+    products = []
+  }
 
-const Hero = () => {
+  // Use your real uploaded product image for the "Rooted in Tradition" showcase (with a reliable fallback)
+  const storyImage =
+    products?.[0]?.thumbnail ||
+    products?.[0]?.images?.[0]?.url ||
+    "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1000&q=85"
+
   return (
     <div className="w-full bg-[#FAF7F2] text-stone-800">
       {/* 1. HERO BANNER */}
@@ -46,7 +42,7 @@ const Hero = () => {
           </h1>
           <p className="mt-5 text-base sm:text-lg text-stone-200 max-w-2xl leading-relaxed">
             Experience authentic ghee, raw honey, cold-pressed oils, and natural jaggery,
-            crafted using time-honored Indian traditions straight from Seth&apos;s fertile organic farms.
+            crafted using time-honored Indian traditions straight from Seth's fertile organic farms.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <LocalizedClientLink
@@ -99,11 +95,11 @@ const Hero = () => {
       <section id="story" className="py-20 sm:py-28 max-w-6xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
           <div className="md:col-span-6 relative">
-            <div className="rounded-2xl overflow-hidden shadow-xl aspect-[4/5] bg-stone-900">
+            <div className="rounded-2xl overflow-hidden shadow-xl aspect-square bg-[#FAF8F5] border border-stone-200/70">
               <img
-                src="https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=1000&q=80"
-                alt="Honeycomb in hands"
-                className="w-full h-full object-cover"
+                src={storyImage}
+                alt="Seth Organic Farm Heritage"
+                className="w-full h-full object-cover object-center"
               />
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg max-w-xs -mt-16 ml-auto mr-4 relative z-10 border border-stone-100">
@@ -145,7 +141,7 @@ const Hero = () => {
         </div>
       </section>
 
-      {/* 4. FARM-TO-TABLE ESSENTIALS */}
+      {/* 4. FARM-TO-TABLE ESSENTIALS (DYNAMIC FROM MEDUSA ADMIN) */}
       <section id="essentials" className="py-16 sm:py-24 bg-[#F5EFE6]/70">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
@@ -158,36 +154,61 @@ const Hero = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {ESSENTIALS.map((item) => (
-              <div
-                key={item.title}
-                className="bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col border border-stone-200/60"
-              >
-                <div className="aspect-[4/5] w-full overflow-hidden bg-stone-100">
-                  <img
-                    src={item.img}
-                    alt={item.title}
-                    className="w-full h-full object-cover hover:scale-105 transition duration-500"
-                  />
-                </div>
-                <div className="p-6 text-center flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-serif text-lg font-bold text-[#143625]">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-stone-500 mt-2 leading-relaxed">
-                      {item.subtitle}
-                    </p>
-                  </div>
+            {products.map((product) => {
+              const productImg =
+                product.thumbnail || product.images?.[0]?.url || ""
+              const { cheapestPrice } = getProductPrice({ product })
+
+              return (
+                <div
+                  key={product.id}
+                  className="bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col border border-stone-200/60 group"
+                >
                   <LocalizedClientLink
-                    href={item.handle}
-                    className="mt-5 inline-block text-xs font-semibold text-[#7C5338] hover:text-[#143625] uppercase tracking-wider"
+                    href={`/products/${product.handle}`}
+                    className="aspect-square w-full overflow-hidden bg-[#FAF8F5] block relative"
                   >
-                    Learn More ↗
+                    {productImg ? (
+                      <img
+                        src={productImg}
+                        alt={product.title}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-stone-400 text-xs">
+                        No Image
+                      </div>
+                    )}
                   </LocalizedClientLink>
+
+                  <div className="p-6 text-center flex-1 flex flex-col justify-between">
+                    <div>
+                      <LocalizedClientLink href={`/products/${product.handle}`}>
+                        <h3 className="font-serif text-lg font-bold text-[#143625] group-hover:text-[#7C5338] transition-colors">
+                          {product.title}
+                        </h3>
+                      </LocalizedClientLink>
+                      {cheapestPrice && (
+                        <p className="text-sm font-semibold text-[#7C5338] mt-1">
+                          {cheapestPrice.calculated_price}
+                        </p>
+                      )}
+                      {product.description && (
+                        <p className="text-xs text-stone-500 mt-2 leading-relaxed line-clamp-2">
+                          {product.description}
+                        </p>
+                      )}
+                    </div>
+                    <LocalizedClientLink
+                      href={`/products/${product.handle}`}
+                      className="mt-5 inline-block text-xs font-semibold text-[#7C5338] hover:text-[#143625] uppercase tracking-wider"
+                    >
+                      Explore Product ↗
+                    </LocalizedClientLink>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -335,7 +356,7 @@ const Hero = () => {
                 <div>
                   <div className="text-amber-500 text-sm mb-3">★★★★★</div>
                   <p className="text-xs sm:text-sm text-stone-600 italic leading-relaxed">
-                    &ldquo;{t.quote}&rdquo;
+                    “{t.quote}”
                   </p>
                 </div>
                 <div className="mt-6 pt-4 border-t border-stone-100">
@@ -348,43 +369,7 @@ const Hero = () => {
         </div>
       </section>
 
-      {/* 9. PHOTO GALLERY GRID */}
-      <section className="max-w-6xl mx-auto px-6 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-auto md:h-[460px]">
-          <div className="md:col-span-6 rounded-xl overflow-hidden h-72 md:h-full">
-            <img
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80"
-              alt="Green organic farm rows"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="md:col-span-6 grid grid-cols-2 gap-4 h-full">
-            <div className="rounded-xl overflow-hidden h-48 md:h-full">
-              <img
-                src="https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=600&q=80"
-                alt="Raw honey dipper"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="rounded-xl overflow-hidden h-48 md:h-full">
-              <img
-                src="https://images.unsplash.com/photo-1631451095765-2c91616fc9e6?auto=format&fit=crop&w=600&q=80"
-                alt="Traditional Bilona churning"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="col-span-2 rounded-xl overflow-hidden h-48 md:h-full">
-              <img
-                src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=1000&q=80"
-                alt="Golden cold pressed oil"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 10. WARM PEACH CALL-TO-ACTION BANNER */}
+      {/* 9. WARM PEACH CALL-TO-ACTION BANNER */}
       <section className="py-20 bg-[#F4DFD0] text-center px-6">
         <div className="max-w-2xl mx-auto">
           <h2 className="font-serif text-3xl sm:text-5xl font-bold text-[#2B1B12] leading-tight">
