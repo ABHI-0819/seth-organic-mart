@@ -7,14 +7,6 @@ import { StoreRegion } from "@medusajs/types"
 import { useWishlist } from "@modules/wishlist/wishlist-context"
 import { useFestival } from "@modules/festival/festival-context"
 
-const CATEGORY_ITEMS = [
-  { name: "A2 Gir Cow Desi Ghee", href: "/collections/desi-ghee", icon: "🫙", tag: "Bestseller" },
-  { name: "Raw Wild Forest Honey", href: "/collections/raw-honey", icon: "🍯", tag: "Raw" },
-  { name: "Cold-Pressed Mustard Oil", href: "/collections/cold-pressed-oils", icon: "🌻", tag: "Wood Pressed" },
-  { name: "Organic Sugarcane Jaggery", href: "/collections/organic-jaggery", icon: "🍬", tag: "Pure" },
-  { name: "Festive Gift Hampers", href: "/store", icon: "🎁", tag: "Special Offer" },
-]
-
 const QUICK_LINKS = [
   { name: "Home", href: "/" },
   { name: "Shop All Products", href: "/store" },
@@ -101,7 +93,7 @@ const SideMenu = ({ regions }: { regions: StoreRegion[] | null }) => {
 
               {/* Navigation Body */}
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
-                {/* Active Festival Banner Callout */}
+                {/* Active Campaign / Offer Callout */}
                 {isFestivalMode && (
                   <div
                     style={{ background: activeFestival.themeBg }}
@@ -120,38 +112,10 @@ const SideMenu = ({ regions }: { regions: StoreRegion[] | null }) => {
                   </div>
                 )}
 
-                {/* Categories */}
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#7C5338] mb-2.5">
-                    Shop by Pure Category
-                  </p>
-                  <ul className="space-y-1.5">
-                    {CATEGORY_ITEMS.map((cat) => (
-                      <li key={cat.name}>
-                        <LocalizedClientLink
-                          href={cat.href}
-                          onClick={() => setOpen(false)}
-                          className="flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-stone-50 border border-stone-200/70 transition group"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <span className="text-lg">{cat.icon}</span>
-                            <span className="font-serif text-xs font-bold text-stone-900 group-hover:text-[#143625] truncate">
-                              {cat.name}
-                            </span>
-                          </div>
-                          <span className="text-[9px] font-bold text-[#7C5338] bg-amber-50 px-2 py-0.5 rounded border border-amber-200/50 shrink-0">
-                            {cat.tag}
-                          </span>
-                        </LocalizedClientLink>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
                 {/* Quick Shortcuts */}
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-stone-400 mb-2">
-                    Quick Links
+                    Navigation
                   </p>
                   <ul className="divide-y divide-stone-200/60">
                     {QUICK_LINKS.map((item) => (
@@ -159,7 +123,7 @@ const SideMenu = ({ regions }: { regions: StoreRegion[] | null }) => {
                         <LocalizedClientLink
                           href={item.href}
                           onClick={() => setOpen(false)}
-                          className="flex items-center justify-between py-2.5 text-xs font-semibold text-stone-700 hover:text-[#143625] transition"
+                          className="flex items-center justify-between py-3 text-sm font-semibold text-stone-800 hover:text-[#143625] transition"
                         >
                           <span>{item.name}</span>
                           <span className="text-stone-400 text-xs">→</span>
@@ -173,14 +137,14 @@ const SideMenu = ({ regions }: { regions: StoreRegion[] | null }) => {
                           setOpen(false)
                           openWishlistDrawer()
                         }}
-                        className="w-full flex items-center justify-between py-2.5 text-xs font-semibold text-stone-700 hover:text-red-500 transition"
+                        className="w-full flex items-center justify-between py-3 text-sm font-semibold text-stone-800 hover:text-red-500 transition"
                       >
-                        <span className="flex items-center gap-1.5">
-                          <span>❤️</span>
-                          <span>My Wishlist</span>
+                        <span className="flex items-center gap-2">
+                          <span className="text-red-500 text-base">❤️</span>
+                          <span>My Saved Wishlist</span>
                         </span>
                         {wishlistCount > 0 && (
-                          <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                          <span className="bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
                             {wishlistCount}
                           </span>
                         )}

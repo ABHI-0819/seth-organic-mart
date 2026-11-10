@@ -3,37 +3,6 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 export default async function Footer() {
   return (
     <footer className="bg-[#0A2015] text-stone-300 w-full border-t border-white/10 pb-16 md:pb-0">
-      {/* Newsletter / First Order Offer Strip */}
-      <div className="border-b border-white/10 bg-[#07170F] py-10 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300 bg-white/10 px-3 py-0.5 rounded-full">
-              JOIN OUR PURE LIVING CLUB
-            </span>
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-white mt-2">
-              Get ₹200 OFF on Your First Vedic Order
-            </h3>
-            <p className="text-xs text-stone-400 mt-1 max-w-md">
-              Receive seasonal farm harvest updates, Vedic health recipes, and subscriber-only festive promotions.
-            </p>
-          </div>
-
-          <div className="w-full max-w-md flex flex-col sm:flex-row gap-2">
-            <input
-              type="email"
-              placeholder="Enter your email address..."
-              className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-stone-400 focus:outline-none focus:border-amber-400 flex-1"
-            />
-            <button
-              type="button"
-              className="bg-[#C89D66] hover:bg-[#b08550] text-[#143625] font-bold text-xs sm:text-sm px-6 py-3 rounded-xl transition shadow-md shrink-0"
-            >
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Links */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-10">
         {/* Brand Column */}

@@ -3,15 +3,34 @@
 import React, { useState } from "react"
 import { useFestival } from "@modules/festival/festival-context"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { AdminPromotion } from "@lib/data/campaigns"
 
-export default function FestivalCampaignSection() {
+interface FestivalCampaignSectionProps {
+  adminPromotion?: AdminPromotion | null
+}
+
+export default function FestivalCampaignSection({
+  adminPromotion,
+}: FestivalCampaignSectionProps) {
   const { activeFestival, timeLeft, isFestivalMode } = useFestival()
   const [copied, setCopied] = useState(false)
 
   if (!isFestivalMode) return null
 
+  // Use dynamic promo code and details from Medusa Admin if available
+  const promoCode = adminPromotion?.code || activeFestival.code
+  const discountPercent = adminPromotion?.application_method?.value
+    ? Math.round(adminPromotion.application_method.value)
+    : activeFestival.discountPercent
+  const bannerTitle =
+    adminPromotion?.campaign?.name || activeFestival.bannerTitle
+  const bannerSubtitle =
+    adminPromotion?.campaign?.description ||
+    adminPromotion?.application_method?.description ||
+    activeFestival.bannerSubtitle
+
   const handleCopyCode = () => {
-    navigator.clipboard?.writeText(activeFestival.code)
+    navigator.clipboard?.writeText(promoCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2200)
   }
@@ -37,14 +56,19 @@ export default function FestivalCampaignSection() {
             <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-white border border-white/20">
               <span className="text-base">{activeFestival.icon}</span>
               <span>{activeFestival.greeting}</span>
+              {adminPromotion?.code && (
+                <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Live Promo
+                </span>
+              )}
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
-              {activeFestival.bannerTitle}
+              {bannerTitle}
             </h2>
 
             <p className="text-sm sm:text-base text-stone-200 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              {activeFestival.bannerSubtitle}. Hand-churned Vedic Bilona Ghee, pure raw forest honey, and unrefined sweeteners prepared specially for your auspicious celebrations.
+              {bannerSubtitle}. Hand-churned Vedic Bilona Ghee, pure raw forest honey, and unrefined sweeteners prepared specially for your auspicious celebrations.
             </p>
 
             {/* Perks / Offers Pills */}
@@ -65,7 +89,7 @@ export default function FestivalCampaignSection() {
                 href="/store"
                 className="bg-white text-stone-900 hover:bg-stone-100 font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl shadow-md transition active:scale-95 flex items-center gap-2"
               >
-                <span>Shop Festive Collection</span>
+                <span>Shop Collection</span>
                 <span>→</span>
               </LocalizedClientLink>
 
@@ -78,7 +102,7 @@ export default function FestivalCampaignSection() {
               >
                 <span className="text-stone-300">Code:</span>
                 <span className="font-mono font-bold tracking-wider text-amber-300">
-                  {activeFestival.code}
+                  {promoCode}
                 </span>
                 <span className="text-[10px] bg-amber-400 text-stone-950 font-bold px-2 py-0.5 rounded ml-1">
                   {copied ? "COPIED! ✓" : "COPY CODE"}
@@ -91,7 +115,7 @@ export default function FestivalCampaignSection() {
           <div className="lg:col-span-5 flex flex-col items-center justify-center">
             <div className="w-full max-w-sm bg-black/35 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center shadow-lg">
               <span className="text-[11px] font-bold uppercase tracking-widest text-amber-300">
-                ⚡ LIMITED TIME FESTIVE OFFER
+                ⚡ LIMITED TIME CAMPAIGN OFFER
               </span>
               <p className="text-xs text-stone-300 mt-1">
                 Prices increase once celebration countdown concludes:
@@ -121,7 +145,7 @@ export default function FestivalCampaignSection() {
 
               <div className="bg-white/10 rounded-xl p-2.5 text-xs text-amber-200 border border-white/10 flex items-center justify-center gap-2">
                 <span>🎁</span>
-                <span>Get flat {activeFestival.discountPercent}% instant discount at checkout</span>
+                <span>Get flat {discountPercent}% instant discount with code {promoCode}</span>
               </div>
             </div>
           </div>

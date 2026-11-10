@@ -4,20 +4,14 @@ import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
-import FestivalBanner from "@modules/festival/festival-banner"
 import HeaderActions from "@modules/layout/components/header-actions"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
 
   return (
-    <div className="sticky top-0 inset-x-0 z-50">
-      {/* 1. Dynamic Festival Campaign Ribbon with Countdown */}
-      <FestivalBanner />
-
-      {/* 2. Main Navigation Bar */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-2xs">
-        <header className="relative h-16 sm:h-20 mx-auto max-w-7xl px-3 sm:px-6 flex items-center justify-between gap-3">
+    <div className="sticky top-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-2xs">
+      <header className="relative h-16 sm:h-20 mx-auto max-w-7xl px-3 sm:px-6 flex items-center justify-between gap-3">
           {/* Left: Hamburger (Mobile) + Seth Organic Farm Logo */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="block md:hidden">
@@ -99,7 +93,6 @@ export default async function Nav() {
             }
           />
         </header>
-      </div>
     </div>
   )
 }
