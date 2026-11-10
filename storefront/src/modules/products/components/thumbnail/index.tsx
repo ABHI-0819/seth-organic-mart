@@ -1,6 +1,6 @@
 import { Container, clx } from "@medusajs/ui"
 import Image from "next/image"
-import React, { useState } from "react"
+import React from "react"
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
 import { normalizeImageUrl } from "@lib/util/image-url"
 
@@ -47,18 +47,7 @@ const ImageOrPlaceholder = ({
   image,
   size,
 }: Pick<ThumbnailProps, "size"> & { image?: string }) => {
-  const [hasError, setHasError] = useState(false)
-
-  if (!image || hasError) {
-    return (
-      <div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center bg-stone-100 text-stone-400">
-        <span className="text-xl sm:text-2xl mb-1">🌿</span>
-        <span className="text-[10px] uppercase font-semibold tracking-wider text-stone-400">Pure Organic</span>
-      </div>
-    )
-  }
-
-  return (
+  return image ? (
     <Image
       src={image}
       alt="Product Thumbnail"
@@ -67,9 +56,11 @@ const ImageOrPlaceholder = ({
       quality={90}
       sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
       fill
-      unoptimized={image.includes("82.29.165.210") || image.includes("seth_medusa_server")}
-      onError={() => setHasError(true)}
     />
+  ) : (
+    <div className="w-full h-full absolute inset-0 flex items-center justify-center bg-stone-100">
+      <PlaceholderImage size={size === "small" ? 16 : 24} />
+    </div>
   )
 }
 
