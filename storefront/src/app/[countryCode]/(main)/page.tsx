@@ -1,21 +1,29 @@
 import { Metadata } from "next"
 
-import FeaturedProducts from "@modules/home/components/featured-products"
 import Hero from "@modules/home/components/hero"
+import PurityBadges from "@modules/home/components/purity-badges"
+import CategoryShowcase from "@modules/home/components/category-showcase"
+import FestivalCampaignSection from "@modules/home/components/festival-campaign"
+import TrendingProductsSection from "@modules/home/components/trending-section"
+import PromotionalBanners from "@modules/home/components/promotional-banners"
+import FarmHeritage from "@modules/home/components/farm-heritage"
+import CustomerReviews from "@modules/home/components/customer-reviews"
+import FeaturedProducts from "@modules/home/components/featured-products"
 import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
+import { listProducts } from "@lib/data/products"
+import { HttpTypes } from "@medusajs/types"
 
 export const metadata: Metadata = {
-  title: "Seth Organic Farm — Pure Ghee, Honey, Oil & Jaggery Template",
+  title: "Seth Organic Farm | Pure A2 Desi Ghee, Raw Honey, Cold-Pressed Oils & Jaggery",
   description:
-    "A performant frontend ecommerce starter template with Next.js 15 and Medusa.",
+    "Experience authentic Indian Vedic traditions with 100% pure organic A2 Gir Cow Bilona Ghee, Raw Forest Honey, Wood-Pressed Mustard Oil & Natural Sugarcane Jaggery.",
 }
 
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
 }) {
   const params = await props.params
-
   const { countryCode } = params
 
   const region = await getRegion(countryCode)
@@ -24,18 +32,59 @@ export default async function Home(props: {
     fields: "id, handle, title",
   })
 
-  if (!collections || !region) {
+  if (!region) {
     return null
   }
 
+  // Fetch live products from Medusa backend
+  let products: HttpTypes.StoreProduct[] = []
+  try {
+    const { response } = await listProducts({
+      countryCode,
+      queryParams: {
+        limit: 12,
+        fields: "*variants.calculated_price,+variants.inventory_quantity,*images",
+      },
+    })
+    products = response.products || []
+  } catch (e) {
+    products = []
+  }
+
   return (
-    <>
+    <div className="w-full bg-[#FAF7F2] text-stone-800">
+      {/* 1. Hero Banner with Visual Impact & CTAs */}
       <Hero />
-      <div className="py-12">
-        <ul className="flex flex-col gap-x-6">
-          <FeaturedProducts collections={collections} region={region} />
-        </ul>
-      </div>
-    </>
+
+      {/* 2. Purity Trust Badges Strip (Organic, Lab Tested, Vedic) */}
+      <PurityBadges />
+
+      {/* 3. Categories Showcase (Swipeable on Mobile) */}
+      <CategoryShowcase />
+
+      {/* 4. Dynamic Festival Mode Campaign (Diwali, Holi, Christmas, New Year, Harvest) */}
+      <FestivalCampaignSection />
+
+      {/* 5. Trending & Bestsellers Grid with Accurate Discount Pricing */}
+      <TrendingProductsSection products={products} region={region} />
+
+      {/* 6. Promotional Editorial Split Banners (Vedic Ghee & Raw Honey) */}
+      <PromotionalBanners />
+
+      {/* 7. Vedic Heritage & Ancestral Processing */}
+      <FarmHeritage />
+
+      {/* 8. Customer Love & Verified Reviews */}
+      <CustomerReviews />
+
+      {/* 9. Collections Rail if available */}
+      {collections && collections.length > 0 && (
+        <div className="py-12 bg-white">
+          <ul className="flex flex-col gap-x-6">
+            <FeaturedProducts collections={collections} region={region} />
+          </ul>
+        </div>
+      )}
+    </div>
   )
 }

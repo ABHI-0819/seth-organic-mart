@@ -18,6 +18,7 @@ type MobileActionsProps = {
   updateOptions: (title: string, value: string) => void
   inStock?: boolean
   handleAddToCart: () => void
+  handleBuyNow?: () => void
   isAdding?: boolean
   show: boolean
   optionsDisabled: boolean
@@ -30,6 +31,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   updateOptions,
   inStock,
   handleAddToCart,
+  handleBuyNow,
   isAdding,
   show,
   optionsDisabled,
@@ -51,6 +53,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   }, [price])
 
   const isSimple = isSimpleProduct(product)
+  const productImg = product.thumbnail || product.images?.[0]?.url
 
   return (
     <>
@@ -63,76 +66,107 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           as={Fragment}
           show={show}
           enter="ease-in-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-300"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+          enterFrom="opacity-0 translate-y-full"
+          enterTo="opacity-100 translate-y-0"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100 translate-y-0"
+          leaveTo="opacity-0 translate-y-full"
         >
           <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
+            className="bg-white/95 backdrop-blur-md flex flex-col gap-y-2 p-3 sm:p-4 w-full border-t border-stone-200/90 shadow-[0_-6px_20px_rgba(0,0,0,0.1)] pb-[calc(env(safe-area-inset-bottom)+0.75rem)]"
             data-testid="mobile-actions"
           >
-            <div className="flex items-center gap-x-2">
-              <span data-testid="mobile-title">{product.title}</span>
-              <span>—</span>
-              {selectedPrice ? (
-                <div className="flex items-end gap-x-2 text-ui-fg-base">
-                  {selectedPrice.price_type === "sale" && (
-                    <p>
-                      <span className="line-through text-small-regular">
-                        {selectedPrice.original_price}
-                      </span>
-                    </p>
-                  )}
-                  <span
-                    className={clx({
-                      "text-ui-fg-interactive":
-                        selectedPrice.price_type === "sale",
-                    })}
+            {/* Product summary header */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {productImg && (
+                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-stone-100 shrink-0 border border-stone-200">
+                    <img
+                      src={productImg}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p
+                    className="text-xs font-bold text-stone-900 truncate"
+                    data-testid="mobile-title"
                   >
+                    {product.title}
+                  </p>
+                  <p className="text-[10px] text-stone-500 truncate">
+                    {variant?.title && variant.title !== "Default Variant"
+                      ? variant.title
+                      : "100% Pure Organic"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Price display with strikethrough */}
+              {selectedPrice && (
+                <div className="flex items-baseline gap-1.5 shrink-0 text-right">
+                  <span className="font-bold text-sm text-[#143625]">
                     {selectedPrice.calculated_price}
                   </span>
+                  {selectedPrice.price_type === "sale" && (
+                    <span className="line-through text-[11px] text-stone-400">
+                      {selectedPrice.original_price}
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <div></div>
               )}
             </div>
-            <div className={clx("grid grid-cols-2 w-full gap-x-4", {
-              "!grid-cols-1": isSimple
-            })}>
-              {!isSimple && <Button
-                onClick={open}
-                variant="secondary"
-                className="w-full"
-                data-testid="mobile-actions-button"
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span>
-                    {variant
-                      ? Object.values(options).join(" / ")
-                      : "Select Options"}
-                  </span>
-                  <ChevronDown />
-                </div>
-              </Button>}
+
+            {/* Action buttons */}
+            <div className="grid grid-cols-2 w-full gap-2 pt-1">
+              {!isSimple ? (
+                <Button
+                  onClick={open}
+                  variant="secondary"
+                  className="w-full h-11 text-xs font-semibold rounded-xl border border-stone-300 text-stone-800"
+                  data-testid="mobile-actions-button"
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="truncate">
+                      {variant
+                        ? Object.values(options).join(" / ")
+                        : "Select Size"}
+                    </span>
+                    <ChevronDown className="shrink-0 ml-1" />
+                  </div>
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!inStock || isAdding}
+                  variant="secondary"
+                  className="w-full h-11 text-xs font-semibold rounded-xl border-2 border-[#143625] text-[#143625]"
+                  isLoading={isAdding}
+                >
+                  {!inStock ? "Out of Stock" : "Add to Cart"}
+                </Button>
+              )}
+
               <Button
-                onClick={handleAddToCart}
-                disabled={!inStock || !variant}
-                className="w-full"
+                onClick={handleBuyNow || handleAddToCart}
+                disabled={!inStock || (!variant && !isSimple)}
+                className="w-full h-11 text-xs font-semibold rounded-xl bg-[#143625] hover:bg-[#0c2418] text-white shadow-md"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
-                {!variant
-                  ? "Select variant"
+                {!variant && !isSimple
+                  ? "Select Option"
                   : !inStock
-                  ? "Out of stock"
-                  : "Add to cart"}
+                  ? "Out of Stock"
+                  : "Buy Now ⚡"}
               </Button>
             </div>
           </div>
         </Transition>
       </div>
+
+      {/* Options Dialog Sheet */}
       <Transition appear show={state} as={Fragment}>
         <Dialog as="div" className="relative z-[75]" onClose={close}>
           <Transition.Child
@@ -144,7 +178,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-gray-700 bg-opacity-75 backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs" />
           </Transition.Child>
 
           <div className="fixed bottom-0 inset-x-0">
@@ -152,44 +186,58 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
+                enterFrom="opacity-0 translate-y-full"
+                enterTo="opacity-100 translate-y-0"
                 leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-full"
               >
                 <Dialog.Panel
-                  className="w-full h-full transform overflow-hidden text-left flex flex-col gap-y-3"
+                  className="w-full max-w-lg bg-[#FAF7F2] rounded-t-3xl shadow-2xl p-6 text-left flex flex-col gap-y-4 border-t border-stone-200"
                   data-testid="mobile-actions-modal"
                 >
-                  <div className="w-full flex justify-end pr-6">
+                  <div className="flex justify-between items-center pb-2 border-b border-stone-200">
+                    <div>
+                      <h3 className="font-serif text-base font-bold text-[#143625]">
+                        Select Product Variant
+                      </h3>
+                      <p className="text-xs text-stone-500">
+                        Choose your preferred weight or volume
+                      </p>
+                    </div>
                     <button
                       onClick={close}
-                      className="bg-white w-12 h-12 rounded-full text-ui-fg-base flex justify-center items-center"
+                      className="w-8 h-8 rounded-full bg-white text-stone-500 flex justify-center items-center hover:bg-stone-100 transition shadow-xs"
                       data-testid="close-modal-button"
                     >
                       <X />
                     </button>
                   </div>
-                  <div className="bg-white px-6 py-12">
+
+                  <div>
                     {(product.variants?.length ?? 0) > 1 && (
-                      <div className="flex flex-col gap-y-6">
-                        {(product.options || []).map((option) => {
-                          return (
-                            <div key={option.id}>
-                              <OptionSelect
-                                option={option}
-                                current={options[option.id]}
-                                updateOption={updateOptions}
-                                title={option.title ?? ""}
-                                disabled={optionsDisabled}
-                              />
-                            </div>
-                          )
-                        })}
+                      <div className="flex flex-col gap-y-4">
+                        {(product.options || []).map((option) => (
+                          <div key={option.id}>
+                            <OptionSelect
+                              option={option}
+                              current={options[option.id]}
+                              updateOption={updateOptions}
+                              title={option.title ?? ""}
+                              disabled={optionsDisabled}
+                            />
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
+
+                  <Button
+                    onClick={close}
+                    className="w-full h-11 bg-[#143625] text-white font-semibold text-xs rounded-xl mt-2"
+                  >
+                    Confirm Selection
+                  </Button>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

@@ -7,11 +7,10 @@ import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 import OptionSelect from "@modules/products/components/product-actions/option-select"
 import { isEqual } from "lodash"
-import { useParams, usePathname, useSearchParams } from "next/navigation"
+import { useParams, usePathname, useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
-import { useRouter } from "next/navigation"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -37,7 +36,9 @@ export default function ProductActions({
   const searchParams = useSearchParams()
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
+  const [isBuyingNow, setIsBuyingNow] = useState(false)
   const countryCode = useParams().countryCode as string
 
   // If there is only 1 variant, preselect the options
@@ -67,7 +68,7 @@ export default function ProductActions({
     }))
   }
 
-  //check if the selected options produce a valid variant
+  // check if the selected options produce a valid variant
   const isValidVariant = useMemo(() => {
     return product.variants?.some((v) => {
       const variantOptions = optionsAsKeymap(v.options)
@@ -94,17 +95,14 @@ export default function ProductActions({
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
-    // If we don't manage inventory, we can always add to cart
     if (selectedVariant && !selectedVariant.manage_inventory) {
       return true
     }
 
-    // If we allow back orders on the variant, we can add to cart
     if (selectedVariant?.allow_backorder) {
       return true
     }
 
-    // If there is inventory available, we can add to cart
     if (
       selectedVariant?.manage_inventory &&
       (selectedVariant?.inventory_quantity || 0) > 0
@@ -112,12 +110,10 @@ export default function ProductActions({
       return true
     }
 
-    // Otherwise, we can't add to cart
     return false
   }, [selectedVariant])
 
   const actionsRef = useRef<HTMLDivElement>(null)
-
   const inView = useIntersection(actionsRef, "0px")
 
   // add the selected variant to the cart
@@ -128,16 +124,32 @@ export default function ProductActions({
 
     await addToCart({
       variantId: selectedVariant.id,
-      quantity: 1,
+      quantity: quantity,
       countryCode,
     })
 
     setIsAdding(false)
   }
 
+  // Buy Now: adds to cart and directly redirects to checkout
+  const handleBuyNow = async () => {
+    if (!selectedVariant?.id) return null
+
+    setIsBuyingNow(true)
+
+    await addToCart({
+      variantId: selectedVariant.id,
+      quantity: quantity,
+      countryCode,
+    })
+
+    setIsBuyingNow(false)
+    router.push(`/${countryCode}/cart`)
+  }
+
   return (
     <>
-      <div className="flex flex-col gap-y-2" ref={actionsRef}>
+      <div className="flex flex-col gap-y-4" ref={actionsRef}>
         <div>
           {(product.variants?.length ?? 0) > 1 && (
             <div className="flex flex-col gap-y-4">
@@ -150,7 +162,7 @@ export default function ProductActions({
                       updateOption={setOptionValue}
                       title={option.title ?? ""}
                       data-testid="product-options"
-                      disabled={!!disabled || isAdding}
+                      disabled={!!disabled || isAdding || isBuyingNow}
                     />
                   </div>
                 )
@@ -162,26 +174,109 @@ export default function ProductActions({
 
         <ProductPrice product={product} variant={selectedVariant} />
 
-        <Button
-          onClick={handleAddToCart}
-          disabled={
-            !inStock ||
-            !selectedVariant ||
-            !!disabled ||
-            isAdding ||
-            !isValidVariant
-          }
-          variant="primary"
-          className="w-full h-10"
-          isLoading={isAdding}
-          data-testid="add-product-button"
-        >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
-        </Button>
+        {/* Quantity Selector */}
+        <div className="flex items-center gap-3 pt-1">
+          <span className="text-xs font-semibold uppercase tracking-wider text-stone-600">
+            Quantity:
+          </span>
+          <div className="flex items-center border border-stone-300 rounded-lg bg-white overflow-hidden shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1 || isAdding || isBuyingNow}
+              className="w-9 h-9 flex items-center justify-center text-stone-700 hover:bg-stone-100 disabled:opacity-40 transition font-bold"
+            >
+              −
+            </button>
+            <span className="w-10 text-center text-sm font-semibold text-stone-800">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => q + 1)}
+              disabled={isAdding || isBuyingNow}
+              className="w-9 h-9 flex items-center justify-center text-stone-700 hover:bg-stone-100 disabled:opacity-40 transition font-bold"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* Action Buttons: Add to Cart & Buy Now */}
+        <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+          <Button
+            onClick={handleAddToCart}
+            disabled={
+              !inStock ||
+              !selectedVariant ||
+              !!disabled ||
+              isAdding ||
+              isBuyingNow ||
+              !isValidVariant
+            }
+            variant="secondary"
+            className="w-full h-12 text-sm font-semibold border-2 border-[#143625] text-[#143625] hover:bg-[#143625]/5 rounded-xl shadow-xs"
+            isLoading={isAdding}
+            data-testid="add-product-button"
+          >
+            {!selectedVariant && !options
+              ? "Select Option"
+              : !inStock || !isValidVariant
+              ? "Out of Stock"
+              : "Add to Cart"}
+          </Button>
+
+          <Button
+            onClick={handleBuyNow}
+            disabled={
+              !inStock ||
+              !selectedVariant ||
+              !!disabled ||
+              isAdding ||
+              isBuyingNow ||
+              !isValidVariant
+            }
+            variant="primary"
+            className="w-full h-12 text-sm font-semibold bg-[#143625] hover:bg-[#0c2418] text-white rounded-xl shadow-md"
+            isLoading={isBuyingNow}
+          >
+            Buy Now ⚡
+          </Button>
+        </div>
+
+        {/* Purity & Shipping Assurance Badges */}
+        <div className="mt-4 pt-4 border-t border-stone-200/80 grid grid-cols-2 gap-3 text-left">
+          <div className="flex items-start gap-2">
+            <span className="text-base">🚚</span>
+            <div>
+              <p className="text-[11px] font-bold text-stone-900">Free Shipping</p>
+              <p className="text-[10px] text-stone-500">On all orders above ₹999</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-base">🏺</span>
+            <div>
+              <p className="text-[11px] font-bold text-stone-900">Vedic Method</p>
+              <p className="text-[10px] text-stone-500">Clay pot wood-churned</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-base">🌿</span>
+            <div>
+              <p className="text-[11px] font-bold text-stone-900">100% Organic</p>
+              <p className="text-[10px] text-stone-500">Zero additives or chemicals</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-base">🫙</span>
+            <div>
+              <p className="text-[11px] font-bold text-stone-900">Glass Jar Packed</p>
+              <p className="text-[10px] text-stone-500">Food-grade pure preservation</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky Mobile Actions */}
         <MobileActions
           product={product}
           variant={selectedVariant}
@@ -189,9 +284,10 @@ export default function ProductActions({
           updateOptions={setOptionValue}
           inStock={inStock}
           handleAddToCart={handleAddToCart}
-          isAdding={isAdding}
+          handleBuyNow={handleBuyNow}
+          isAdding={isAdding || isBuyingNow}
           show={!inView}
-          optionsDisabled={!!disabled || isAdding}
+          optionsDisabled={!!disabled || isAdding || isBuyingNow}
         />
       </div>
     </>

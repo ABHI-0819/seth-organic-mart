@@ -7,6 +7,7 @@ import { StoreCartShippingOption } from "@medusajs/types"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
 import Footer from "@modules/layout/templates/footer"
 import Nav from "@modules/layout/templates/nav"
+import MobileBottomNav from "@modules/layout/components/bottom-nav"
 import FreeShippingPriceNudge from "@modules/shipping/components/free-shipping-price-nudge"
 
 export const metadata: Metadata = {
@@ -24,6 +25,8 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
     shippingOptions = shipping_options
   }
 
+  const cartCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0
+
   return (
     <>
       <Nav />
@@ -38,8 +41,13 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
+
       {props.children}
+
       <Footer />
+
+      {/* Persistent Mobile Bottom Navigation Bar (Home, Shop, Search, Wishlist, Cart) */}
+      <MobileBottomNav cartCount={cartCount} />
     </>
   )
 }

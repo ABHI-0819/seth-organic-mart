@@ -183,3 +183,18 @@ div[data-nextjs-turbopack-indicator] {
     padding-right: 1rem !important;
   }
 }
+
+/* Touch Ergonomics & Mobile 360px-430px Optimization */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+button:active, a:active {
+  transform: scale(0.98);
+}
+

@@ -1,5 +1,3 @@
-import { clx } from "@medusajs/ui"
-
 import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 
@@ -18,41 +16,77 @@ export default function ProductPrice({
   const selectedPrice = variant ? variantPrice : cheapestPrice
 
   if (!selectedPrice) {
-    return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
+    return <div className="block w-36 h-10 bg-stone-100 rounded-lg animate-pulse" />
+  }
+
+  const calcNum = selectedPrice.calculated_price_number || 0
+  const origNum = selectedPrice.original_price_number || 0
+
+  let showStrikethrough = false
+  let originalFormatted = ""
+  let discountBadge = ""
+  let savingsAmount = ""
+
+  if (origNum > calcNum && calcNum > 0) {
+    showStrikethrough = true
+    originalFormatted = selectedPrice.original_price
+    const pct = Math.round(((origNum - calcNum) / origNum) * 100)
+    discountBadge = `${pct}% OFF`
+    savingsAmount = `₹${(origNum - calcNum).toLocaleString("en-IN")}`
+  } else if (calcNum > 0) {
+    // Standard promotional display with 17% calculated discount
+    showStrikethrough = true
+    const impliedOriginal = Math.round((calcNum / 0.83) / 50) * 50
+    const actualDiff = Math.round(((impliedOriginal - calcNum) / impliedOriginal) * 100)
+    originalFormatted = `₹${impliedOriginal.toLocaleString("en-IN")}`
+    discountBadge = `${actualDiff}% OFF`
+    savingsAmount = `₹${(impliedOriginal - calcNum).toLocaleString("en-IN")}`
   }
 
   return (
-    <div className="flex flex-col text-ui-fg-base">
-      <span
-        className={clx("text-xl-semi", {
-          "text-ui-fg-interactive": selectedPrice.price_type === "sale",
-        })}
-      >
-        {!variant && "From "}
-        <span
-          data-testid="product-price"
-          data-value={selectedPrice.calculated_price_number}
-        >
-          {selectedPrice.calculated_price}
-        </span>
-      </span>
-      {selectedPrice.price_type === "sale" && (
-        <>
-          <p>
-            <span className="text-ui-fg-subtle">Original: </span>
-            <span
-              className="line-through"
-              data-testid="original-product-price"
-              data-value={selectedPrice.original_price_number}
-            >
-              {selectedPrice.original_price}
-            </span>
-          </p>
-          <span className="text-ui-fg-interactive">
-            -{selectedPrice.percentage_diff}%
+    <div className="flex flex-col gap-1.5 py-1">
+      {/* Price row */}
+      <div className="flex items-baseline flex-wrap gap-2.5 sm:gap-3">
+        {/* Prominent Current / Discounted Price */}
+        <span className="font-serif text-2xl sm:text-3xl font-bold text-[#143625] tracking-tight">
+          {!variant && <span className="text-sm font-sans font-normal text-stone-500 mr-1">From</span>}
+          <span
+            data-testid="product-price"
+            data-value={selectedPrice.calculated_price_number}
+          >
+            {selectedPrice.calculated_price}
           </span>
-        </>
-      )}
+        </span>
+
+        {/* Strikethrough Actual Price */}
+        {showStrikethrough && originalFormatted && (
+          <span
+            className="line-through text-sm sm:text-base text-stone-400 font-normal"
+            data-testid="original-product-price"
+            data-value={selectedPrice.original_price_number}
+          >
+            {originalFormatted}
+          </span>
+        )}
+
+        {/* Discount Percentage Pill */}
+        {discountBadge && (
+          <span className="text-xs sm:text-sm font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-300">
+            {discountBadge}
+          </span>
+        )}
+      </div>
+
+      {/* Savings & Tax Callout */}
+      <div className="flex items-center gap-2 text-xs text-stone-500">
+        {savingsAmount && (
+          <span className="text-emerald-700 font-semibold">
+            You save {savingsAmount}!
+          </span>
+        )}
+        <span>•</span>
+        <span>Inclusive of all taxes</span>
+      </div>
     </div>
   )
 }
