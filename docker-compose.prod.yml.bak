@@ -1,0 +1,66 @@
+services:
+  seth-postgres:
+    image: postgres:16-alpine
+    container_name: seth_postgres
+    restart: always
+    env_file: .env
+    volumes:
+      - seth_postgres_data:/var/lib/postgresql/data
+    networks:
+      - seth_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  medusa-server:
+    image: seth-medusa-backend:latest
+    container_name: seth_medusa_server
+    restart: always
+    command: ["sh", "-c", "./node_modules/.bin/medusa db:migrate && ./node_modules/.bin/medusa develop"]
+    depends_on:
+      seth-postgres:
+        condition: service_healthy
+    ports:
+      - "0.0.0.0:5000:9000"
+    env_file: .env
+    volumes:
+      - ./backend/medusa-config.ts:/app/medusa-config.ts
+      - ./backend/src:/app/src
+      - ./backend/static:/app/static
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@seth-postgres:5432/${POSTGRES_DB}?sslmode=disable
+    networks:
+      - seth_net
+
+  storefront:
+    image: seth-organic-farm-storefront:latest
+    container_name: seth_storefront
+    volumes:
+      - ./storefront/src:/app/src
+      - ./storefront/public:/app/public
+      - ./storefront/next.config.js:/app/next.config.js
+    restart: always
+    command: ["sh", "-c", "npm run dev -- -p 4200 -H 0.0.0.0"]
+    depends_on:
+      - medusa-server
+    ports:
+      - "0.0.0.0:4200:4200"
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://82.29.165.210:5000
+      NEXT_PUBLIC_BASE_URL: http://82.29.165.210:4200
+      NEXT_PUBLIC_DEFAULT_REGION: in
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: ${NEXT_PUBLIC_RAZORPAY_KEY_ID}
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: pk_2acf0a05695cf1afc5545010876f05c790ede3c4dfb8fa663d79a54d645cc38b
+    networks:
+      - seth_net
+
+networks:
+  seth_net:
+    driver: bridge
+
+volumes:
+  seth_postgres_data:

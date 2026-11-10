@@ -8,7 +8,7 @@ export default async function linkFulfillmentProvider({ container }: ExecArgs) {
 
   console.log("🔗 Linking Manual Fulfillment Provider to Stock Location...")
 
-  let [location] = await stockLocationModule.listStockLocations()
+  let [location] = await stockLocationModule.listStockLocations({})
   if (!location) {
     const { result } = await createStockLocationsWorkflow(container).run({
       input: { locations: [{ name: "Seth Organic Farm Warehouse" }] },

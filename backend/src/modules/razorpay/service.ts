@@ -1,18 +1,34 @@
 import { AbstractPaymentProvider, PaymentSessionStatus } from "@medusajs/framework/utils"
 import {
-  CreatePaymentProviderSession,
-  PaymentProviderError,
-  PaymentProviderSessionResponse,
-  UpdatePaymentProviderSession,
+  CapturePaymentInput,
+  CapturePaymentOutput,
+  AuthorizePaymentInput,
+  AuthorizePaymentOutput,
+  CancelPaymentInput,
+  CancelPaymentOutput,
+  InitiatePaymentInput,
+  InitiatePaymentOutput,
+  DeletePaymentInput,
+  DeletePaymentOutput,
+  GetPaymentStatusInput,
+  GetPaymentStatusOutput,
+  RefundPaymentInput,
+  RefundPaymentOutput,
+  RetrievePaymentInput,
+  RetrievePaymentOutput,
+  UpdatePaymentInput,
+  UpdatePaymentOutput,
   WebhookActionResult,
+  ProviderWebhookPayload,
 } from "@medusajs/framework/types"
 
 type Options = {
   key_id: string
   key_secret: string
+  webhook_secret?: string
 }
 
-export default class RazorpayProviderService extends AbstractPaymentProvider<Options> {
+class RazorpayProviderService extends AbstractPaymentProvider<Options> {
   static identifier = "razorpay"
   protected options_: Options
 
@@ -21,98 +37,106 @@ export default class RazorpayProviderService extends AbstractPaymentProvider<Opt
     this.options_ = options
   }
 
-  async initiatePayment(
-    context: CreatePaymentProviderSession
-  ): Promise<PaymentProviderError | PaymentProviderSessionResponse> {
-    const { amount, currency_code, context: customerContext } = context
+  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
+    const { amount, currency_code, context } = input
     const amountInPaise = Math.round(Number(amount) * 100)
-    const keyId = this.options_.key_id || ""
-    const keySecret = this.options_.key_secret || ""
 
-    // If real Razorpay keys are configured, create a live Razorpay Order via REST API
-    if (
-      keyId &&
-      keySecret &&
-      !keyId.includes("YOUR_KEY") &&
-      !keyId.includes("placeholder")
-    ) {
-      try {
-        const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64")
-        const res = await fetch("https://api.razorpay.com/v1/orders", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${auth}`,
-          },
-          body: JSON.stringify({
-            amount: amountInPaise,
-            currency: (currency_code || "INR").toUpperCase(),
-            receipt: customerContext.session_id || `seth_${Date.now()}`,
-          }),
-        })
-        if (res.ok) {
-          const rzpOrder = await res.json()
-          return {
-            data: {
-              razorpay_order_id: rzpOrder.id,
-              amount: amountInPaise,
-              currency: (currency_code || "INR").toUpperCase(),
-              key_id: keyId,
-            },
-          }
-        }
-      } catch (e: any) {
-        console.warn("Razorpay API warning:", e.message)
+    if (!this.options_.key_id || !this.options_.key_secret) {
+      return {
+        id: `rzp_mock_${Date.now()}`,
+        data: { amount: amountInPaise, currency: currency_code.toUpperCase() },
       }
     }
 
-    return {
-      data: {
+    const auth = Buffer.from(`${this.options_.key_id}:${this.options_.key_secret}`).toString("base64")
+    const response = await fetch("https://api.razorpay.com/v1/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${auth}`,
+      },
+      body: JSON.stringify({
         amount: amountInPaise,
-        currency: (currency_code || "INR").toUpperCase(),
-        key_id: keyId,
+        currency: currency_code.toUpperCase(),
+        receipt: (context?.idempotency_key as string) || `rcpt_${Date.now()}`,
+      }),
+    })
+
+    const order: any = await response.json()
+
+    return {
+      id: order.id || `rzp_order_${Date.now()}`,
+      data: {
+        ...order,
+        razorpay_order_id: order.id,
+        key_id: this.options_.key_id,
       },
     }
   }
 
-  async authorizePayment(
-    paymentSessionData: Record<string, unknown>
-  ): Promise<PaymentProviderError | { status: PaymentSessionStatus; data: Record<string, unknown> }> {
+  async authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
     return {
       status: PaymentSessionStatus.AUTHORIZED,
-      data: paymentSessionData,
+      data: input.data || {},
     }
   }
 
-  async capturePayment(paymentData: Record<string, unknown>) {
-    return { ...paymentData, status: "captured" }
+  async capturePayment(input: CapturePaymentInput): Promise<CapturePaymentOutput> {
+    return {
+      data: {
+        ...(input.data || {}),
+        status: "captured",
+      },
+    }
   }
 
-  async cancelPayment(paymentData: Record<string, unknown>) {
-    return { ...paymentData, status: "canceled" }
+  async cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
+    return {
+      data: {
+        ...(input.data || {}),
+        status: "canceled",
+      },
+    }
   }
 
-  async deletePayment(paymentSessionData: Record<string, unknown>) {
-    return paymentSessionData
+  async deletePayment(input: DeletePaymentInput): Promise<DeletePaymentOutput> {
+    return {
+      data: input.data || {},
+    }
   }
 
-  async getPaymentStatus(paymentSessionData: Record<string, unknown>) {
-    return PaymentSessionStatus.AUTHORIZED
+  async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusOutput> {
+    return {
+      status: PaymentSessionStatus.AUTHORIZED,
+    }
   }
 
-  async refundPayment(paymentData: Record<string, unknown>, refundAmount: number) {
-    return { ...paymentData, refunded_amount: refundAmount }
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
+    return {
+      data: {
+        ...(input.data || {}),
+        refunded_amount: input.amount,
+      },
+    }
   }
 
-  async retrievePayment(paymentSessionData: Record<string, unknown>) {
-    return paymentSessionData
+  async retrievePayment(input: RetrievePaymentInput): Promise<RetrievePaymentOutput> {
+    return {
+      data: input.data || {},
+    }
   }
 
-  async updatePayment(context: UpdatePaymentProviderSession) {
-    return { data: context.data }
+  async updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
+    return {
+      data: input.data || {},
+    }
   }
 
-  async getWebhookActionAndData(): Promise<WebhookActionResult> {
-    return { action: "not_supported" }
+  async getWebhookActionAndData(payload: ProviderWebhookPayload["payload"]): Promise<WebhookActionResult> {
+    return {
+      action: "not_supported",
+    }
   }
 }
+
+export default RazorpayProviderService

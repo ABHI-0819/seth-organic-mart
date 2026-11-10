@@ -10,7 +10,7 @@ export default async function fixStockLocation({ container }: ExecArgs) {
   const stockLocationService = container.resolve(Modules.STOCK_LOCATION)
 
   const channels = await salesChannelService.listSalesChannels()
-  let locations = await stockLocationService.listStockLocations()
+  let locations = await stockLocationService.listStockLocations({})
 
   if (!locations.length) {
     const { result } = await createStockLocationsWorkflow(container).run({

@@ -18,7 +18,19 @@ module.exports = defineConfig({
     },
   },
   admin: {
-    backendUrl: process.env.MEDUSA_BACKEND_URL,
+    backendUrl: process.env.MEDUSA_BACKEND_URL || "https://api.sethorganicfarm.com",
+    vite: () => {
+      return {
+        server: {
+          allowedHosts: [
+            "api.sethorganicfarm.com",
+            ".sethorganicfarm.com",
+            "localhost",
+            "127.0.0.1",
+          ],
+        },
+      }
+    },
   },
   modules: [
     {
@@ -29,7 +41,22 @@ module.exports = defineConfig({
             resolve: "@medusajs/file-local",
             id: "local",
             options: {
-              backend_url: "http://82.29.165.210:5000/static",
+              backend_url: "https://api.sethorganicfarm.com/static",
+            },
+          },
+        ],
+      },
+    },
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          {
+            resolve: "./src/modules/razorpay",
+            id: "razorpay",
+            options: {
+              key_id: process.env.RAZORPAY_KEY_ID,
+              key_secret: process.env.RAZORPAY_KEY_SECRET,
             },
           },
         ],
