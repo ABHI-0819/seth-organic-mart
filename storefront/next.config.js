@@ -19,6 +19,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: "http",
@@ -29,7 +30,25 @@ const nextConfig = {
         hostname: "82.29.165.210",
       },
       {
+        protocol: "http",
+        hostname: "82.29.165.210",
+        port: "5000",
+      },
+      {
         protocol: "https",
+        hostname: "82.29.165.210",
+      },
+      {
+        protocol: "http",
+        hostname: "seth_medusa_server",
+        port: "9000",
+      },
+      {
+        protocol: "https",
+        hostname: "api.sethorganicfarm.com",
+      },
+      {
+        protocol: "http",
         hostname: "api.sethorganicfarm.com",
       },
       {
@@ -43,6 +62,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.amazonaws.com",
       },
       {
         protocol: "https",

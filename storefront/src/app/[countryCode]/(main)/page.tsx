@@ -17,8 +17,11 @@ import { HttpTypes } from "@medusajs/types"
 export const metadata: Metadata = {
   title: "Seth Organic Farm | Pure A2 Desi Ghee, Raw Honey, Cold-Pressed Oils & Jaggery",
   description:
-    "Experience authentic Indian Vedic traditions with 100% pure organic A2 Gir Cow Bilona Ghee, Raw Forest Honey, Wood-Pressed Mustard Oil & Natural Sugarcane Jaggery.",
+    "Experience authentic Indian traditions with 100% pure organic A2 Gir Cow Bilona Ghee, Raw Forest Honey, Wood-Pressed Mustard Oil & Natural Sugarcane Jaggery.",
 }
+
+// Enable fast ISR revalidation on homepage
+export const revalidate = 60
 
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
@@ -26,37 +29,34 @@ export default async function Home(props: {
   const params = await props.params
   const { countryCode } = params
 
-  const region = await getRegion(countryCode)
-
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
+  // Parallelize all remote queries simultaneously for maximum loading speed
+  const [region, collectionsData, adminPromotion, productsData] =
+    await Promise.all([
+      getRegion(countryCode).catch(() => null),
+      listCollections({
+        fields: "id, handle, title",
+      }).catch(() => ({ collections: [] })),
+      getActiveAdminPromotion().catch(() => null),
+      listProducts({
+        countryCode,
+        queryParams: {
+          limit: 12,
+          fields:
+            "*variants.calculated_price,+variants.inventory_quantity,*images",
+        },
+      }).catch(() => ({ response: { products: [] } })),
+    ])
 
   if (!region) {
     return null
   }
 
-  // 1. Fetch live admin promotion / campaign from Medusa backend
-  const adminPromotion = await getActiveAdminPromotion()
-
-  // 2. Fetch live products from Medusa backend
-  let products: HttpTypes.StoreProduct[] = []
-  try {
-    const { response } = await listProducts({
-      countryCode,
-      queryParams: {
-        limit: 12,
-        fields: "*variants.calculated_price,+variants.inventory_quantity,*images",
-      },
-    })
-    products = response.products || []
-  } catch (e) {
-    products = []
-  }
+  const collections = collectionsData?.collections || []
+  const products: HttpTypes.StoreProduct[] = productsData?.response?.products || []
 
   return (
     <div className="w-full bg-[#FAF7F2] text-stone-800">
-      {/* 1. Hero Banner with Visual Impact & CTAs */}
+      {/* 1. Clean Hero Banner with Visual Impact & CTAs */}
       <Hero />
 
       {/* 2. Purity Trust Badges Strip (Organic, Lab Tested, Vedic) */}

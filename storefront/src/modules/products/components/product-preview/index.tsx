@@ -109,7 +109,7 @@ export default async function ProductPreview({
 
           {/* Purity Guarantee Pill */}
           <p className="text-[11px] text-stone-500 mt-1 line-clamp-1 flex items-center gap-1">
-            <span className="text-emerald-700 font-medium">✓ Vedic Heritage</span>
+            <span className="text-emerald-700 font-medium">✓ 100% Pure Organic</span>
             <span>•</span>
             <span>Zero Preservatives</span>
           </p>
