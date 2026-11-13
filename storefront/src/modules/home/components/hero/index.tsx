@@ -15,54 +15,26 @@ export default function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-[#143625]/65 to-black/75 backdrop-blur-[0.5px]" />
 
       {/* Hero Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex flex-col items-center">
-        {/* Simple Heritage Tag */}
-        <p className="text-xs sm:text-sm font-semibold tracking-widest uppercase text-amber-300 mb-3 sm:mb-4">
-          100% Certified Organic • Direct From Farm
-        </p>
-
-        {/* Hero Title */}
-        <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-bold leading-[1.18] tracking-tight max-w-3xl">
-          Pure Goodness From <br />
-          <span className="italic font-normal text-[#F3E9D2]">
-            Ancestral Soil to Family Home
-          </span>
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-20 flex flex-col items-center">
+        {/* Main Headline */}
+        <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-white font-bold tracking-tight uppercase leading-tight">
+          PURE GOODNESS FROM FARM TO HOME
         </h1>
 
-        {/* Hero Subtitle */}
-        <p className="mt-4 sm:mt-5 text-sm sm:text-base lg:text-lg text-stone-200 max-w-2xl leading-relaxed font-sans font-normal">
-          Experience authentic A2 Desi Cow Ghee, untouched wild forest honey, wood-pressed oils, and chemical-free sugarcane jaggery—handcrafted with traditional care.
+        {/* Clean Subtitle */}
+        <p className="mt-4 sm:mt-5 text-base sm:text-lg lg:text-xl text-stone-200 font-sans max-w-2xl leading-relaxed">
+          Authentic A2 Ghee, Wild Honey & Wood-Pressed Oils
         </p>
 
-        {/* Action CTAs */}
-        <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4 w-full max-w-md">
+        {/* Single Prominent CTA */}
+        <div className="mt-8 sm:mt-10">
           <LocalizedClientLink
             href="/store"
-            className="w-full sm:w-auto bg-[#C89D66] hover:bg-[#b08550] text-[#143625] font-bold px-8 py-3.5 rounded-xl transition-all shadow-lg hover:shadow-xl text-xs sm:text-sm active:scale-95 flex items-center justify-center gap-2"
+            className="inline-flex items-center justify-center gap-2.5 bg-[#C89D66] hover:bg-[#b58c57] text-[#143625] font-bold text-sm sm:text-base px-9 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95 group"
           >
-            <span>Shop Bestsellers</span>
-            <span className="text-base font-bold">→</span>
+            <span>Shop Now</span>
+            <span className="text-lg transition-transform group-hover:translate-x-1">→</span>
           </LocalizedClientLink>
-
-          <LocalizedClientLink
-            href="/collections/desi-ghee"
-            className="w-full sm:w-auto border border-white/60 hover:bg-white/15 text-white font-semibold px-7 py-3.5 rounded-xl transition text-xs sm:text-sm backdrop-blur-xs active:scale-95"
-          >
-            Explore A2 Ghee
-          </LocalizedClientLink>
-        </div>
-
-        {/* Clean Bottom Trust Indicators */}
-        <div className="mt-8 sm:mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-stone-300 text-xs font-medium">
-          <span className="flex items-center gap-1.5">
-            <span className="text-emerald-400">✓</span> Free Shipping &gt; ₹999
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="text-emerald-400">✓</span> Zero Preservatives
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="text-emerald-400">✓</span> 4.9/5 Customer Trust
-          </span>
         </div>
       </div>
     </section>
