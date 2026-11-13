@@ -62,36 +62,8 @@ export default function GlobalLoader() {
       }
     }
 
-    // Intercept Fetch API requests
-    const originalFetch = window.fetch
-    window.fetch = async (...args) => {
-      const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url || ""
-      const headers = (args[1]?.headers || {}) as Record<string, string>
-      const isPrefetch =
-        headers["Next-Router-Prefetch"] === "1" ||
-        headers["next-router-prefetch"] === "1" ||
-        url.includes("_rsc=")
-
-      if (!isPrefetch) {
-        if (url.includes("postalpincode")) {
-          showLoader("Verifying PIN...")
-        } else if (url.includes("nominatim")) {
-          showLoader("Locating...")
-        } else {
-          showLoader("Processing...")
-        }
-      }
-
-      try {
-        return await originalFetch(...args)
-      } finally {
-        if (!isPrefetch) {
-          hideLoader()
-        }
-      }
-    }
-
-    // Intercept Link Clicks for Page Navigation
+    // Loader is controlled cleanly for explicit user actions
+    // Link Clicks for Page Navigation
     const handleAnchorClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement)?.closest("a")
       if (!target) return
@@ -126,7 +98,6 @@ export default function GlobalLoader() {
     document.addEventListener("submit", handleFormSubmit, true)
 
     return () => {
-      window.fetch = originalFetch
       document.removeEventListener("click", handleAnchorClick, true)
       document.removeEventListener("submit", handleFormSubmit, true)
       if (safetyTimer) clearTimeout(safetyTimer)

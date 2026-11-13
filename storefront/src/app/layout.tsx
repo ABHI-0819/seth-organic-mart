@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   title: "Seth Organic Farm | Pure Desi Ghee, Raw Forest Honey, Cold-Pressed Oils & Jaggery",
   description:
     "Experience Vedic tradition with 100% certified organic A2 Gir Cow Bilona Ghee, Raw Honey, Cold-Pressed Mustard Oil & Chemical-Free Sugarcane Jaggery direct from ancestral farms.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
