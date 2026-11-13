@@ -2,7 +2,6 @@ import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import { Suspense } from "react"
 import "styles/globals.css"
-import GlobalLoader from "@modules/common/components/global-loader"
 import Providers from "@modules/common/components/providers"
 
 export const metadata: Metadata = {
@@ -32,9 +31,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         />
       </head>
       <body className="bg-[#FAF7F2] text-stone-800 antialiased font-sans selection:bg-[#143625] selection:text-white pb-14 md:pb-0">
-        <Suspense fallback={null}>
-          <GlobalLoader />
-        </Suspense>
         <Providers>
           <main className="relative min-h-screen">{props.children}</main>
         </Providers>
