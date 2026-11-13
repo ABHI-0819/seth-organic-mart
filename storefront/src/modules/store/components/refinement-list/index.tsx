@@ -35,7 +35,7 @@ const RefinementList = ({
   }
 
   return (
-    <div className="flex small:flex-col gap-3 py-2 mb-4 small:px-0 small:min-w-[250px] small:ml-[1.675rem]">
+    <div className="flex small:flex-col gap-3 py-2 mb-4 small:mb-0 small:px-0 small:w-[240px] small:shrink-0 small:pr-6">
       <SortProducts
         sortBy={sortBy}
         setQueryParams={setQueryParams}
