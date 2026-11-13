@@ -15,19 +15,24 @@ export default function FestivalCampaignSection({
   const { activeFestival, timeLeft, isFestivalMode } = useFestival()
   const [copied, setCopied] = useState(false)
 
-  if (!isFestivalMode) return null
+  // Only render if an active promotion exists from Medusa Admin or festival mode is enabled
+  if (!adminPromotion && !isFestivalMode) return null
 
-  // Use dynamic promo code and details from Medusa Admin if available
-  const promoCode = adminPromotion?.code || activeFestival.code
+  const promoCode = adminPromotion?.code || activeFestival?.code || "FARM10"
   const discountPercent = adminPromotion?.application_method?.value
     ? Math.round(adminPromotion.application_method.value)
-    : activeFestival.discountPercent
+    : activeFestival?.discountPercent || 10
+
   const bannerTitle =
-    adminPromotion?.campaign?.name || activeFestival.bannerTitle
+    adminPromotion?.campaign?.name ||
+    activeFestival?.bannerTitle ||
+    "Special Farm Offer"
+
   const bannerSubtitle =
     adminPromotion?.campaign?.description ||
     adminPromotion?.application_method?.description ||
-    activeFestival.bannerSubtitle
+    activeFestival?.bannerSubtitle ||
+    `Enjoy flat ${discountPercent}% off on all pure organic products.`
 
   const handleCopyCode = () => {
     navigator.clipboard?.writeText(promoCode)
@@ -35,119 +40,47 @@ export default function FestivalCampaignSection({
     setTimeout(() => setCopied(false), 2200)
   }
 
-  const pad = (n: number) => String(n).padStart(2, "0")
-
   return (
-    <section className="py-8 sm:py-14 content-container">
-      <div
-        style={{
-          background: activeFestival.themeBg,
-          color: activeFestival.textColor,
-        }}
-        className="relative rounded-3xl overflow-hidden p-6 sm:p-12 shadow-xl border border-white/15"
-      >
-        {/* Festive Background Glow Accents */}
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 rounded-full bg-amber-400/20 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 rounded-full bg-orange-500/20 blur-3xl pointer-events-none" />
+    <section className="py-6 sm:py-10 content-container">
+      <div className="relative rounded-2xl overflow-hidden bg-[#143625] text-white p-6 sm:p-10 shadow-md border border-white/10">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Offer Details */}
+          <div className="space-y-2 text-center md:text-left max-w-xl">
+            <span className="inline-block text-[11px] font-bold tracking-widest uppercase bg-[#C89D66] text-[#143625] px-3 py-1 rounded-full">
+              Exclusive Offer • {discountPercent}% OFF
+            </span>
 
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Details */}
-          <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-white border border-white/20">
-              <span className="text-base">{activeFestival.icon}</span>
-              <span>{activeFestival.greeting}</span>
-              {adminPromotion?.code && (
-                <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Live Promo
-                </span>
-              )}
-            </div>
-
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight tracking-tight text-white">
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white pt-1">
               {bannerTitle}
             </h2>
 
-            <p className="text-sm sm:text-base text-stone-200 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              {bannerSubtitle}. Hand-churned Vedic Bilona Ghee, pure raw forest honey, and unrefined sweeteners prepared specially for your auspicious celebrations.
+            <p className="text-sm text-stone-200 leading-relaxed font-sans">
+              {bannerSubtitle}
             </p>
-
-            {/* Perks / Offers Pills */}
-            <div className="flex flex-wrap gap-2 pt-1 justify-center lg:justify-start">
-              {activeFestival.perks.map((perk) => (
-                <span
-                  key={perk}
-                  className="text-xs bg-black/25 backdrop-blur-xs text-amber-200 px-3 py-1 rounded-lg border border-white/10"
-                >
-                  ✓ {perk}
-                </span>
-              ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-3 justify-center lg:justify-start">
-              <LocalizedClientLink
-                href="/store"
-                className="bg-white text-stone-900 hover:bg-stone-100 font-bold text-xs sm:text-sm px-6 py-3.5 rounded-xl shadow-md transition active:scale-95 flex items-center gap-2"
-              >
-                <span>Shop Collection</span>
-                <span>→</span>
-              </LocalizedClientLink>
-
-              {/* Coupon Pill Button */}
-              <button
-                type="button"
-                onClick={handleCopyCode}
-                aria-label="Copy coupon code"
-                className="bg-black/30 hover:bg-black/40 text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded-xl border border-white/25 transition active:scale-95 flex items-center gap-2"
-              >
-                <span className="text-stone-300">Code:</span>
-                <span className="font-mono font-bold tracking-wider text-amber-300">
-                  {promoCode}
-                </span>
-                <span className="text-[10px] bg-amber-400 text-stone-950 font-bold px-2 py-0.5 rounded ml-1">
-                  {copied ? "COPIED! ✓" : "COPY CODE"}
-                </span>
-              </button>
-            </div>
           </div>
 
-          {/* Right Countdown Box */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center">
-            <div className="w-full max-w-sm bg-black/35 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center shadow-lg">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-amber-300">
-                ⚡ LIMITED TIME CAMPAIGN OFFER
+          {/* Action & Promo Code */}
+          <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={handleCopyCode}
+              aria-label="Copy promo code"
+              className="bg-white/10 hover:bg-white/20 text-white font-mono text-sm px-4 py-3 rounded-xl border border-white/20 transition active:scale-95 flex items-center gap-2"
+            >
+              <span className="text-stone-300 text-xs font-sans">Code:</span>
+              <span className="font-bold tracking-wider text-amber-300">{promoCode}</span>
+              <span className="text-[10px] bg-amber-400 text-[#143625] font-bold font-sans px-2 py-0.5 rounded ml-1">
+                {copied ? "COPIED! ✓" : "COPY"}
               </span>
-              <p className="text-xs text-stone-300 mt-1">
-                Prices increase once celebration countdown concludes:
-              </p>
+            </button>
 
-              {/* 4 Block Countdown */}
-              <div className="grid grid-cols-4 gap-2 sm:gap-3 my-5">
-                {[
-                  { label: "Days", val: pad(timeLeft.days) },
-                  { label: "Hours", val: pad(timeLeft.hours) },
-                  { label: "Minutes", val: pad(timeLeft.minutes) },
-                  { label: "Seconds", val: pad(timeLeft.seconds) },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="bg-white/10 rounded-xl p-2.5 sm:p-3 border border-white/10 flex flex-col items-center"
-                  >
-                    <span className="font-mono font-bold text-xl sm:text-2xl text-white">
-                      {item.val}
-                    </span>
-                    <span className="text-[9px] uppercase tracking-wider text-stone-300 mt-0.5">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-white/10 rounded-xl p-2.5 text-xs text-amber-200 border border-white/10 flex items-center justify-center gap-2">
-                <span>🎁</span>
-                <span>Get flat {discountPercent}% instant discount with code {promoCode}</span>
-              </div>
-            </div>
+            <LocalizedClientLink
+              href="/store"
+              className="bg-[#C89D66] hover:bg-[#b58c57] text-[#143625] font-bold text-sm px-6 py-3 rounded-xl transition shadow-xs active:scale-95 flex items-center gap-2"
+            >
+              <span>Shop Now</span>
+              <span>→</span>
+            </LocalizedClientLink>
           </div>
         </div>
       </div>

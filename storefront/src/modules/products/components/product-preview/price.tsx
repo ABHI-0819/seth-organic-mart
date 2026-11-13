@@ -11,15 +11,7 @@ export default function PreviewPrice({
   festivalDiscount = 15,
 }: PreviewPriceProps) {
   if (!price) {
-    return (
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-bold text-[#143625]">₹2,500</span>
-        <span className="text-xs text-stone-400 line-through">₹3,000</span>
-        <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-          17% OFF
-        </span>
-      </div>
-    )
+    return null
   }
 
   const calcNum = price.calculated_price_number || 0
@@ -30,19 +22,11 @@ export default function PreviewPrice({
   let discountBadge = ""
 
   if (origNum > calcNum && calcNum > 0) {
-    // Official Medusa price list discount
+    // Official Medusa backend price-list discount
     showStrikethrough = true
     originalFormatted = price.original_price
     const pct = Math.round(((origNum - calcNum) / origNum) * 100)
     discountBadge = `${pct}% OFF`
-  } else if (calcNum > 0) {
-    // Festival / promotional retail discount: compute MRP accurately
-    showStrikethrough = true
-    const discountFactor = (100 - festivalDiscount) / 100
-    const impliedOriginal = Math.round(calcNum / discountFactor / 50) * 50 // round to nearest 50
-    const actualDiff = Math.round(((impliedOriginal - calcNum) / impliedOriginal) * 100)
-    originalFormatted = `₹${impliedOriginal.toLocaleString("en-IN")}`
-    discountBadge = `${actualDiff}% OFF`
   }
 
   return (

@@ -33,14 +33,6 @@ export default function ProductPrice({
     const pct = Math.round(((origNum - calcNum) / origNum) * 100)
     discountBadge = `${pct}% OFF`
     savingsAmount = `₹${(origNum - calcNum).toLocaleString("en-IN")}`
-  } else if (calcNum > 0) {
-    // Standard promotional display with 17% calculated discount
-    showStrikethrough = true
-    const impliedOriginal = Math.round((calcNum / 0.83) / 50) * 50
-    const actualDiff = Math.round(((impliedOriginal - calcNum) / impliedOriginal) * 100)
-    originalFormatted = `₹${impliedOriginal.toLocaleString("en-IN")}`
-    discountBadge = `${actualDiff}% OFF`
-    savingsAmount = `₹${(impliedOriginal - calcNum).toLocaleString("en-IN")}`
   }
 
   return (
