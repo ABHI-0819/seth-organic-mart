@@ -39,12 +39,15 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       })
   }
 
-  // Robust image fallback chain
-  const productImg = normalizeImageUrl(
+  // Robust image fallback chain across item, variant product, and item product
+  const rawImage =
     item.thumbnail ||
-      item.variant?.product?.thumbnail ||
-      item.variant?.product?.images?.[0]?.url
-  )
+    (item as any).product?.thumbnail ||
+    item.variant?.product?.thumbnail ||
+    (item as any).product?.images?.[0]?.url ||
+    item.variant?.product?.images?.[0]?.url
+
+  const productImg = normalizeImageUrl(rawImage)
 
   return (
     <div
@@ -55,13 +58,13 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
       <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto min-w-0 flex-1">
         <LocalizedClientLink
           href={`/products/${item.product_handle}`}
-          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white shrink-0 border border-stone-200/90 shadow-2xs block"
+          className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white shrink-0 border border-stone-200/90 shadow-2xs block"
         >
           <Thumbnail
             thumbnail={productImg}
-            images={item.variant?.product?.images}
+            images={item.variant?.product?.images || (item as any).product?.images}
             size="square"
-            className="!rounded-none"
+            className="!rounded-none !border-none !shadow-none w-full h-full"
           />
         </LocalizedClientLink>
 
